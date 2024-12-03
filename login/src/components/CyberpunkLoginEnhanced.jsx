@@ -3,6 +3,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, GithubIcon, LogInIcon } from "lucide-react";
 import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
 import ExplosionEffect from "./ExplosionEffect";
+import { Link } from "react-router-dom";
+
+// Add this somewhere in your component for testing
+<button
+  onClick={() => {
+    localStorage.clear();
+    window.location.reload();
+  }}
+  className="absolute top-4 right-4 text-white/50 hover:text-white"
+>
+  Clear Storage
+</button>;
 
 const CyberpunkLoginEnhanced = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,34 +25,57 @@ const CyberpunkLoginEnhanced = () => {
     rememberMe: false,
   });
 
-  // Check for remembered credentials on mount
+  const clearCredentials = () => {
+    setCredentials({
+      email: "",
+      password: "",
+      rememberMe: false,
+    });
+    localStorage.removeItem("rememberedUser");
+  };
+
+  // Add this useEffect near your other useEffect hooks
   useEffect(() => {
+    // Check for remembered user on mount
     const remembered = localStorage.getItem("rememberedUser");
     if (remembered) {
       const savedCredentials = JSON.parse(remembered);
-      setCredentials((prev) => ({
-        ...prev,
-        email: savedCredentials.email,
-        rememberMe: true,
-      }));
+      if (savedCredentials.rememberMe) {
+        setCredentials(prev => ({
+          ...prev,
+          email: savedCredentials.email,
+          rememberMe: true
+        }));
+      } else {
+        localStorage.removeItem("rememberedUser");
+      }
     }
-    // Initial loading simulation
+  
+    // Start loading timeout
     setTimeout(() => setIsLoading(false), 2000);
+  
+    // Cleanup on unmount
+    return () => {
+      if (!credentials.rememberMe) {
+        clearCredentials();
+      }
+    };
   }, []);
 
+  // Update the handleLogin function
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // Handle remember me
     if (credentials.rememberMe) {
       localStorage.setItem(
         "rememberedUser",
         JSON.stringify({
           email: credentials.email,
+          rememberMe: true,
         })
       );
     } else {
-      localStorage.removeItem("rememberedUser");
+      clearCredentials();
     }
 
     setShowExplosion(true);
@@ -77,6 +112,16 @@ const CyberpunkLoginEnhanced = () => {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#0A0F1B] to-[#1A0B2E]">
       <EnhancedCyberpunkBackground />
+
+      <button
+        onClick={() => {
+          localStorage.clear();
+          window.location.reload();
+        }}
+        className="absolute px-4 py-2 text-sm border rounded-full top-4 right-4 text-white/50 hover:text-white border-white/20 backdrop-blur-sm"
+      >
+        Clear Storage
+      </button>
 
       <AnimatePresence>
         {showExplosion && (
@@ -171,12 +216,16 @@ const CyberpunkLoginEnhanced = () => {
                   <input
                     type="checkbox"
                     checked={credentials.rememberMe}
-                    onChange={(e) =>
-                      setCredentials({
-                        ...credentials,
-                        rememberMe: e.target.checked,
-                      })
-                    }
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setCredentials((prev) => ({
+                        ...prev,
+                        rememberMe: isChecked,
+                      }));
+                      if (!isChecked) {
+                        clearCredentials();
+                      }
+                    }}
                     className={checkboxStyle}
                   />
                   <span className="relative">
@@ -225,6 +274,18 @@ const CyberpunkLoginEnhanced = () => {
                       />
                     </div>
                   </motion.button>
+                </div>
+
+                <div className="mt-4 text-center">
+                  <Link
+                    to="/register"
+                    className="transition-colors duration-200 text-white/70 hover:text-white"
+                  >
+                    Don&apos;t have an account?
+                    <span className="ml-1 bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] bg-clip-text text-transparent">
+                      Register here
+                    </span>
+                  </Link>
                 </div>
               </form>
             </motion.div>
