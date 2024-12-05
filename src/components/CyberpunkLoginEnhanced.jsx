@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, LogIn } from "lucide-react";
+import { Camera, LogIn, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
 import ExplosionEffect from "./ExplosionEffect";
@@ -108,6 +108,11 @@ const CyberpunkLoginEnhanced = () => {
     password: "",
     rememberMe: false,
   });
+  const [showCamera, setShowCamera] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     // Simplified loading check
@@ -231,6 +236,70 @@ const CyberpunkLoginEnhanced = () => {
     
     // Force a clean reload of the page
     window.location.href = window.location.origin;
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      console.log("Requesting camera access...");
+      
+      const constraints = {
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user"
+        },
+        audio: false
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("Camera access granted:", stream.getVideoTracks()[0].label);
+      
+      setShowCamera(true);
+      
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          streamRef.current = stream;
+        } else {
+          console.error("Video ref still not available after delay");
+          stopCamera();
+        }
+      }, 100);
+
+    } catch (err) {
+      console.error("Camera access error:", err);
+      setError(err.message || "Could not access camera");
+      stopCamera();
+    }
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    setImagePreview(canvas.toDataURL('image/jpeg'));
+    stopCamera();
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setShowCamera(false);
   };
 
   // Styles
@@ -445,6 +514,91 @@ const CyberpunkLoginEnhanced = () => {
                   </Link>
                 </div>
               </form>
+
+              {/* Photo Upload/Capture UI */}
+              <div className="absolute flex justify-between w-full px-4 top-4">
+                {/* File Upload Button - left side */}
+                <motion.button
+                  onClick={() => fileInputRef.current.click()}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] flex items-center justify-center group"
+                >
+                  <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
+                    <Upload className="w-6 h-6 text-white group-hover:text-[#00F6FF] transition-colors" />
+                  </div>
+                </motion.button>
+
+                {/* Camera Button - right side */}
+                <motion.button
+                  onClick={showCamera ? stopCamera : startCamera}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] flex items-center justify-center group"
+                >
+                  <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
+                    <Camera className="w-6 h-6 text-white group-hover:text-[#00F6FF] transition-colors" />
+                  </div>
+                </motion.button>
+
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </div>
+
+              {/* Image Preview - centered between upload buttons */}
+              {imagePreview && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full overflow-hidden border-2 border-[#00F6FF]">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              )}
+
+              {/* Camera Preview */}
+              {showCamera && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+                >
+                  <div className="relative p-4 rounded-lg bg-black/90">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full max-w-md rounded-lg"
+                    />
+                    <div className="flex justify-center gap-4 mt-4">
+                      <motion.button
+                        onClick={capturePhoto}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-2 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] text-white"
+                      >
+                        Capture
+                      </motion.button>
+                      <motion.button
+                        onClick={stopCamera}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-2 text-white rounded-full bg-white/10"
+                      >
+                        Cancel
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           </motion.div>
         )}
