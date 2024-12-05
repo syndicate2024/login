@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, LogIn, Upload } from "lucide-react";
+import { Camera, LogIn, Upload, Trash2, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
 import ExplosionEffect from "./ExplosionEffect";
@@ -61,32 +61,6 @@ ClearStorageButton.propTypes = {
   onClear: PropTypes.func.isRequired
 };
 
-const OAuthButton = ({ provider, icon: Icon }) => {
-  const { signIn } = useClerk();
-
-  const handleOAuthSignIn = async (strategy) => {
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy,
-        redirectUrl: '/dashboard',
-        redirectUrlComplete: '/dashboard',
-      });
-    } catch (err) {
-      console.error('OAuth error:', err);
-    }
-  };
-
-  return (
-    <button
-      onClick={() => handleOAuthSignIn(`oauth_${provider}`)}
-      className="flex items-center justify-center w-full gap-2 px-4 py-2 transition-colors border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-    >
-      <Icon className="w-5 h-5" />
-      <span>Continue with {provider.charAt(0).toUpperCase() + provider.slice(1)}</span>
-    </button>
-  );
-};
-
 const CyberpunkLoginEnhanced = () => {
   const navigate = useNavigate();
   const clerk = useClerk();
@@ -109,10 +83,14 @@ const CyberpunkLoginEnhanced = () => {
     rememberMe: false,
   });
   const [showCamera, setShowCamera] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState(() => {
+    const saved = localStorage.getItem('userProfileImage');
+    return saved || null;
+  });
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Simplified loading check
@@ -238,12 +216,16 @@ const CyberpunkLoginEnhanced = () => {
     window.location.href = window.location.origin;
   };
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
+      setIsProcessing(true);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        const imageData = reader.result;
+        setImagePreview(imageData);
+        localStorage.setItem('userProfileImage', imageData);
+        setIsProcessing(false);
       };
       reader.readAsDataURL(file);
     }
@@ -251,6 +233,12 @@ const CyberpunkLoginEnhanced = () => {
 
   const startCamera = async () => {
     try {
+      // Only request camera if we don't already have a stream
+      if (streamRef.current) {
+        console.log("Camera already active");
+        return;
+      }
+
       console.log("Requesting camera access...");
       
       const constraints = {
@@ -285,13 +273,21 @@ const CyberpunkLoginEnhanced = () => {
   };
 
   const capturePhoto = () => {
+    setIsProcessing(true);
     const video = videoRef.current;
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    setImagePreview(canvas.toDataURL('image/jpeg'));
+    
+    // Maintain aspect ratio
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    canvas.width = 400; // base width
+    canvas.height = canvas.width / aspectRatio;
+    
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    setImagePreview(imageData);
+    localStorage.setItem('userProfileImage', imageData);
     stopCamera();
+    setIsProcessing(false);
   };
 
   const stopCamera = () => {
@@ -354,7 +350,7 @@ const CyberpunkLoginEnhanced = () => {
       <EnhancedCyberpunkBackground />
 
       <ClearStorageButton onClear={handleClearStorage} />
-
+      
       <AnimatePresence>
         {showExplosion && (
           <ExplosionEffect onComplete={handleExplosionComplete} />
@@ -379,16 +375,85 @@ const CyberpunkLoginEnhanced = () => {
               {/* Error Message */}
               <ErrorMessage message={error} />
 
-              {/* Logo/Avatar */}
-              <motion.div
-                className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
-                whileHover={{ scale: 1.05, rotate: 360 }}
-                transition={{ duration: 0.8 }}
-              >
-                <div className="w-full h-full rounded-full bg-[#0A0F1B] flex items-center justify-center">
-                  <Camera size={40} className="text-[#00F6FF]" />
+              {/* Main Container */}
+              <div className="flex flex-col items-center mb-8">
+                {/* Top Controls - Spread to edges */}
+                <div className="flex justify-between w-full px-4">
+                  <motion.button
+                    onClick={() => fileInputRef.current.click()}
+                    whileHover={{ scale: 1.05, rotate: 360 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
+                  >
+                    <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
+                  </motion.button>
+
+                  <motion.button
+                    onClick={showCamera ? stopCamera : startCamera}
+                    whileHover={{ scale: 1.05, rotate: 360 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
+                  >
+                    <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
+                      <Camera className="w-6 h-6 text-white" />
+                    </div>
+                  </motion.button>
                 </div>
-              </motion.div>
+
+                {/* Single Main Image/Placeholder Area */}
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 360 }}
+                  transition={{ duration: 0.8 }}
+                  className="w-40 h-40 mt-4 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
+                >
+                  {imagePreview ? (
+                    <div className="relative w-full h-full overflow-hidden rounded-full group">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="object-cover w-full h-full"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center gap-4 transition-opacity opacity-0 bg-black/50 group-hover:opacity-100">
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fileInputRef.current.click();
+                          }}
+                          whileHover={{ scale: 1.1 }}
+                          className="p-2 rounded-full bg-[#00F6FF]/20 hover:bg-[#00F6FF]/40"
+                        >
+                          <Upload className="w-6 h-6 text-white" />
+                        </motion.button>
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImagePreview(null);
+                            localStorage.removeItem('userProfileImage');
+                          }}
+                          whileHover={{ scale: 1.1 }}
+                          className="p-2 rounded-full bg-[#FF2E97]/20 hover:bg-[#FF2E97]/40"
+                        >
+                          <Trash2 className="w-6 h-6 text-white" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
+                      <Camera className="w-16 h-16 text-white" />
+                    </div>
+                  )}
+                </motion.div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </div>
 
               {/* Title with glitch effect */}
               <div className="mb-8 text-center">
@@ -422,8 +487,8 @@ const CyberpunkLoginEnhanced = () => {
                     }
                     placeholder="Email or Username"
                     className={inputClasses}
-                    autoComplete="off" // Add this
-                    autoSave="off" // Add this
+                    autoComplete="off"
+                    autoSave="off"
                   />
                   <div className="absolute inset-0 transition-opacity duration-300 opacity-0 -z-10 group-hover:opacity-100">
                     <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] blur-sm" />
@@ -514,53 +579,6 @@ const CyberpunkLoginEnhanced = () => {
                   </Link>
                 </div>
               </form>
-
-              {/* Photo Upload/Capture UI */}
-              <div className="absolute flex justify-between w-full px-4 top-4">
-                {/* File Upload Button - left side */}
-                <motion.button
-                  onClick={() => fileInputRef.current.click()}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] flex items-center justify-center group"
-                >
-                  <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
-                    <Upload className="w-6 h-6 text-white group-hover:text-[#00F6FF] transition-colors" />
-                  </div>
-                </motion.button>
-
-                {/* Camera Button - right side */}
-                <motion.button
-                  onClick={showCamera ? stopCamera : startCamera}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] flex items-center justify-center group"
-                >
-                  <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
-                    <Camera className="w-6 h-6 text-white group-hover:text-[#00F6FF] transition-colors" />
-                  </div>
-                </motion.button>
-
-                {/* Hidden file input */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-              </div>
-
-              {/* Image Preview - centered between upload buttons */}
-              {imagePreview && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full overflow-hidden border-2 border-[#00F6FF]">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              )}
 
               {/* Camera Preview */}
               {showCamera && (

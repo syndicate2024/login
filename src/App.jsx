@@ -8,7 +8,7 @@ import CyberpunkLoginEnhanced from './components/CyberpunkLoginEnhanced';
 import CyberpunkRegistration from './components/CyberpunkRegistration';
 import CyberpunkVerification from './components/CyberpunkVerification';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import Dashboard from './components/dashboard/Dashboard';
+import Dashboard from './components/Dashboard';
 
 // Loading screen component stays the same
 const LoadingScreen = () => (
