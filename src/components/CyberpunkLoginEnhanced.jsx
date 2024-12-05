@@ -162,8 +162,8 @@ const CyberpunkLoginEnhanced = () => {
   
       await clerkSignIn.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: `${window.location.origin}/dashboard`
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/dashboard"
       });
     } catch (err) {
       console.error("Google login error:", err);
@@ -186,27 +186,28 @@ const CyberpunkLoginEnhanced = () => {
         return;
       }
 
-      const baseUrl = window.location.origin;
+      // Start OAuth flow with GitHub
       await clerkSignIn.authenticateWithRedirect({
         strategy: "oauth_github",
-        redirectUrl: `${baseUrl}/sso-callback`,
-        redirectUrlComplete: `${baseUrl}/dashboard`,
-        additionalData: {
-          // Optional metadata
-          from: "login-page",
-          provider: "github"
-        }
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/dashboard",
+        // Add additional scopes if needed
+        additionalScopes: ["user:email"],
       });
 
     } catch (err) {
       console.error("GitHub login error details:", {
         message: err.message,
         code: err.code,
-        status: err.status
+        status: err.status,
+        stack: err.stack
       });
       
-      if (err.message?.includes('single session')) {
-        navigate('/dashboard');
+      // Handle specific error cases
+      if (err.message?.includes('popup')) {
+        setError("Popup was blocked. Please enable popups and try again.");
+      } else if (err.message?.includes('network')) {
+        setError("Network error. Please check your connection and try again.");
       } else {
         setError("GitHub login failed. Please try again or use another method.");
       }
@@ -220,14 +221,13 @@ const CyberpunkLoginEnhanced = () => {
   };
 
   const handleClearStorage = () => {
+    // Clear all storage related to credentials
     localStorage.clear();
-    localStorage.removeItem("rememberedUser");
-    setCredentials({
-      email: "",
-      password: "",
-      rememberMe: false,
-    });
-    window.location.reload();
+    sessionStorage.clear();
+    clearCredentials();
+    
+    // Force a clean reload of the page
+    window.location.href = window.location.origin;
   };
 
   // Styles
@@ -266,6 +266,16 @@ const CyberpunkLoginEnhanced = () => {
       }));
     }
   }, []);
+
+  useEffect(() => {
+    // Clear credentials on component unmount if remember me is not checked
+    return () => {
+      if (!credentials.rememberMe) {
+        clearCredentials();
+        localStorage.removeItem('rememberedCredentials');
+      }
+    };
+  }, [credentials.rememberMe]);
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#0A0F1B] to-[#1A0B2E]">

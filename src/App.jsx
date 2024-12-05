@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 import { ClerkProvider } from "@clerk/clerk-react";
+import { config } from './config';
 import CyberpunkLoginEnhanced from './components/CyberpunkLoginEnhanced';
 import CyberpunkRegistration from './components/CyberpunkRegistration';
 import CyberpunkVerification from './components/CyberpunkVerification';
@@ -27,29 +28,52 @@ const LoadingScreen = () => (
   </div>
 );
 
-// SSO Callback component stays the same
+// SSO Callback component
 const SSOCallback = () => {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn) {
-        navigate('/dashboard');
-      } else {
-        // If sign in failed, redirect back to login
-        navigate('/', { 
-          state: { 
-            error: 'Social login failed. Please try again.' 
+    const handleCallback = async () => {
+      if (!isLoaded) return;
+
+      console.log("SSO Callback - Auth State:", { 
+        isLoaded, 
+        isSignedIn,
+        hasError: location.state?.error,
+        searchParams: location.search
+      });
+
+      try {
+        if (isSignedIn) {
+          console.log("User is signed in, redirecting to dashboard");
+          navigate(config.routes.dashboard, { replace: true });
+        } else {
+          console.log("Sign in failed, redirecting to login");
+          navigate(config.routes.home, { 
+            replace: true,
+            state: { 
+              error: 'Social login failed. Please try again.' 
+            }
+          });
+        }
+      } catch (error) {
+        console.error("SSO Callback error:", error);
+        navigate(config.routes.home, {
+          replace: true,
+          state: {
+            error: error.message || 'Authentication failed. Please try again.'
           }
         });
       }
-    }
-  }, [isLoaded, isSignedIn, navigate]);
+    };
+
+    handleCallback();
+  }, [isLoaded, isSignedIn, navigate, location]);
 
   return <LoadingScreen />;
 };
-
 
 function AppRoutes() {
   const location = useLocation();
@@ -63,15 +87,14 @@ function AppRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public routes */}
-        <Route path="/" element={<CyberpunkLoginEnhanced />} />
-        <Route path="/register" element={<CyberpunkRegistration />} />
-        <Route path="/verify-email" element={<CyberpunkVerification />} />
-        <Route path="/sso-callback" element={<SSOCallback />} />
-        
+        <Route path={config.routes.home} element={<CyberpunkLoginEnhanced />} />
+        <Route path={config.routes.register} element={<CyberpunkRegistration />} />
+        <Route path={config.routes.verifyEmail} element={<CyberpunkVerification />} />
+        <Route path={config.routes.ssoCallback} element={<SSOCallback />} />
         
         {/* Protected routes */}
         <Route
-          path="/dashboard"
+          path={config.routes.dashboard}
           element={
             <ProtectedRoute>
               <Dashboard /> 
@@ -84,8 +107,10 @@ function AppRoutes() {
 }
 
 function App() {
+  console.log("Initializing app with Clerk key:", config.clerkPublishableKey.substring(0, 10) + "...");
+
   return (
-    <ClerkProvider publishableKey="your_publishable_key">
+    <ClerkProvider publishableKey={config.clerkPublishableKey}>
       <Router>
         <AppRoutes />
       </Router>
