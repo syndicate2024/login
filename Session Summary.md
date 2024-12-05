@@ -1,4 +1,11 @@
-``` DO NOT DELETE THIS FILE Get-ChildItem "X:\Cursor\Projects\login-app\Login\login\src" -Recurse | Out-File -FilePath "director_structure.txt" ```
+``` DO NOT DELETE THIS FILE 
+Get-ChildItem "X:\Cursor\Projects\login-app\Login\login\src" -Recurse | Out-File -FilePath "director_structure.txt" 
+
+or 
+
+tree /F /A "X:\Cursor\Projects\login-app\Login\login\src" > directory_structure.txt
+
+```
 
 ```markdown
 # Session Summary - Dec 03, 2024
@@ -162,3 +169,47 @@
 - Semi-transparent overlays
 - Responsive spacing
 - Consistent padding and margins
+
+
+# Session Summary - Dec 05, 2024 
+
+I'll help you update the Session Summary with our discussion about enhancing the dashboard design. I'll add entries for the features we discussed:
+
+```markdown
+# Session Summary Update - Dec 04, 2024 continued
+
+## Planned Dashboard Enhancements
+
+### Visual Elements
+- Circuit board patterns inspired by AI logo
+  - Dynamic glowing pathways
+  - Interactive circuit traces
+  - Neon accent animations
+- Particle system background integration
+- Enhanced glassmorphism effects
+
+### Content Cards Design
+- Floating card layout with cyberpunk aesthetics
+- Glowing borders with gradient animations
+- Interactive hover states
+- Circuit pattern overlays
+
+### Navigation Improvements
+- Enhanced sidebar animations
+- Smooth transition effects
+- Explosion effect between section changes
+- Dynamic active state indicators
+
+### Next Steps
+1. Implement circuit board patterns in dashboard sections
+2. Create interactive content cards
+3. Enhance background particle effects
+4. Add section transition animations
+
+### Design Goals
+- Maintain consistent cyberpunk theme from login
+- Balance visual effects with usability
+- Ensure smooth performance
+- Keep color scheme aligned with brand (neon blue #00F6FF, pink #FF2E97)
+```
+
