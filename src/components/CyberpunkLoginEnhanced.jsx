@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, GithubIcon, LogIn } from "lucide-react"; // Changed LogInIcon to LogIn
+import { Camera, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
 import ExplosionEffect from "./ExplosionEffect";
 import { Link } from "react-router-dom";
 import { useSignIn, useUser, useClerk } from "@clerk/clerk-react";
 import PropTypes from 'prop-types';
+import { FaFacebook } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 
 // Error Message Component
 const ErrorMessage = ({ message }) => (
@@ -59,6 +61,32 @@ ClearStorageButton.propTypes = {
   onClear: PropTypes.func.isRequired
 };
 
+const OAuthButton = ({ provider, icon: Icon }) => {
+  const { signIn } = useClerk();
+
+  const handleOAuthSignIn = async (strategy) => {
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: '/dashboard',
+        redirectUrlComplete: '/dashboard',
+      });
+    } catch (err) {
+      console.error('OAuth error:', err);
+    }
+  };
+
+  return (
+    <button
+      onClick={() => handleOAuthSignIn(`oauth_${provider}`)}
+      className="flex items-center justify-center w-full gap-2 px-4 py-2 transition-colors border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+    >
+      <Icon className="w-5 h-5" />
+      <span>Continue with {provider.charAt(0).toUpperCase() + provider.slice(1)}</span>
+    </button>
+  );
+};
+
 const CyberpunkLoginEnhanced = () => {
   const navigate = useNavigate();
   const clerk = useClerk();
@@ -74,7 +102,7 @@ const CyberpunkLoginEnhanced = () => {
   const [showExplosion, setShowExplosion] = useState(false);
   const [error, setError] = useState(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [isFacebookLoading, setIsFacebookLoading] = useState(false);
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -173,46 +201,21 @@ const CyberpunkLoginEnhanced = () => {
     }
   };
   
-  const handleGithubLogin = async () => {
+  const handleFacebookLogin = async () => {
     try {
-      setIsGithubLoading(true);
-      setError(null);
+      setIsFacebookLoading(true);
+      console.log("Starting Facebook OAuth flow...");
       
-      console.log("Starting GitHub OAuth flow...");
-      
-      if (isSignedIn) {
-        console.log("User already signed in, redirecting to dashboard");
-        navigate('/dashboard');
-        return;
-      }
-
-      // Start OAuth flow with GitHub
       await clerkSignIn.authenticateWithRedirect({
-        strategy: "oauth_github",
+        strategy: "oauth_facebook",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/dashboard",
-        // Add additional scopes if needed
-        additionalScopes: ["user:email"],
+        redirectUrlComplete: "/dashboard"
       });
-
     } catch (err) {
-      console.error("GitHub login error details:", {
-        message: err.message,
-        code: err.code,
-        status: err.status,
-        stack: err.stack
-      });
-      
-      // Handle specific error cases
-      if (err.message?.includes('popup')) {
-        setError("Popup was blocked. Please enable popups and try again.");
-      } else if (err.message?.includes('network')) {
-        setError("Network error. Please check your connection and try again.");
-      } else {
-        setError("GitHub login failed. Please try again or use another method.");
-      }
+      console.error("Facebook login error:", err);
+      setError("Facebook login failed. Please try again or use another method.");
     } finally {
-      setIsGithubLoading(false);
+      setIsFacebookLoading(false);
     }
   };
 
@@ -381,28 +384,17 @@ const CyberpunkLoginEnhanced = () => {
                 <div className="flex items-center justify-between gap-4 mt-8">
                   {/* Google Button */}
                   <motion.button
-                    type="button"
                     onClick={handleGoogleLogin}
                     disabled={isGoogleLoading}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] overflow-hidden"
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
                   >
                     <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
                       {isGoogleLoading ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          className="w-5 h-5 border-2 rounded-full border-t-white border-r-transparent border-b-white border-l-transparent"
-                        />
+                        <RefreshCcw className="w-6 h-6 text-white animate-spin" />
                       ) : (
-                        <span className="text-xl font-bold text-white group-hover:text-[#00F6FF] transition-colors">
-                          G
-                        </span>
+                        <FcGoogle className="w-7 h-7" />
                       )}
                     </div>
                   </motion.button>
@@ -421,31 +413,21 @@ const CyberpunkLoginEnhanced = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#00F6FF] to-[#FF2E97] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.button>
 
-                  {/* GitHub Button */}
+                  {/* Facebook Button */}
                   <motion.button
-                    type="button"
-                    onClick={handleGithubLogin}
-                    disabled={isGithubLoading}
+                    onClick={handleFacebookLogin}
+                    disabled={isFacebookLoading}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px] overflow-hidden"
+                    className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] p-[2px]"
                   >
                     <div className="flex items-center justify-center w-full h-full bg-black rounded-full">
-                      {isGithubLoading ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          className="w-5 h-5 border-2 rounded-full border-t-white border-r-transparent border-b-white border-l-transparent"
-                        />
+                      {isFacebookLoading ? (
+                        <RefreshCcw className="w-6 h-6 text-white animate-spin" />
                       ) : (
-                        <GithubIcon
-                          size={20}
-                          className="text-white group-hover:text-[#00F6FF] transition-colors"
-                        />
+                        <span className="text-[2rem] font-bold leading-none text-[#1877F2] group-hover:text-[#2196F3]">
+                          f
+                        </span>
                       )}
                     </div>
                   </motion.button>

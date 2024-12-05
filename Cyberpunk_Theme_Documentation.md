@@ -1,4 +1,3 @@
-
 # Theme Documentation: Cyberpunk Design for AI-Powered Learning Platform
 
 ## 1. Core Design Principles
@@ -13,6 +12,8 @@ Extracted from code and components:
 - **Primary Colors**:
   - Neon Blue (`#00F6FF`)
   - Neon Pink (`#FF2E97`)
+  - Facebook Brand Blue (`#1877F2`)
+  - Facebook Hover Blue (`#2196F3`)
 - **Accent Colors**:
   - Dark Purple (`#1A0B2E`)
   - White (`#FFFFFF`)
@@ -20,6 +21,9 @@ Extracted from code and components:
   - Gradient from (`#0A0F1B`) to (`#1A0B2E`)
 - **Highlight Colors**:
   - Cyan Glow (`#66FFFF`)
+- **Overlay Colors**:
+  - Semi-transparent black (`bg-black/40`, `bg-black/50`)
+  - Semi-transparent white (`bg-white/10`, `bg-white/20`)
 
 ## 3. Fonts
 - **Primary Font (Headings)**: Orbitron - A geometric sans-serif with a strong futuristic feel
@@ -93,3 +97,19 @@ Extracted from code and components:
 - **Buttons**: Gradient-filled, hover-animated.
 - **Forms**: Glowing input fields and validation checks.
 - **Icons**: Interactive neon-themed using `lucide-react`.
+
+## 10. Social Authentication Buttons
+- **Circular Design**:
+  - Size: `w-12 h-12`
+  - Gradient border: `from-[#FF2E97] to-[#00F6FF]`
+  - Black background inner circle
+  - Scale animation on hover: 1.05
+- **Google Button**:
+  - Original Google colors preserved
+  - Fixed icon size: `w-7 h-7`
+  - No color transitions
+- **Facebook Button**:
+  - Large "f" character in Facebook blue
+  - Brand color: `#1877F2`
+  - Hover color: `#2196F3`
+  - Text size: `text-[2rem]`

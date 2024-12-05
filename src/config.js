@@ -1,7 +1,7 @@
 // Application configuration
 export const config = {
   clerkPublishableKey: "pk_test_ZW1pbmVudC1zcG9uZ2UtMzEuY2xlcmsuYWNjb3VudHMuZGV2JA",
-  appUrl: "http://localhost:5175",
+  appUrl: "http://localhost:5177",
   routes: {
     home: "/",
     dashboard: "/dashboard",
