@@ -1,9 +1,9 @@
 ``` DO NOT DELETE THIS FILE 
-Get-ChildItem "X:\Cursor\Projects\login-app\Login\login\src" -Recurse | Out-File -FilePath "director_structure.txt" 
+Get-ChildItem "X:\Cursor\Projects\ai_powered_learning_platform\src" -Recurse | Out-File -FilePath "director_structure.txt" 
 
 or 
 
-tree /F /A "X:\Cursor\Projects\login-app\Login\login\src" > directory_structure.txt
+tree /F /A "X:\Cursor\Projects\ai_powered_learning_platform\src" > directory_structure.txt
 
 ```
 
