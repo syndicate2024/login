@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, LogIn, Upload, Trash2, RefreshCcw } from "lucide-react";
+import { Camera, LogIn, Upload, Trash2, RefreshCcw, GithubIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
-import ExplosionEffect from "./ExplosionEffect";
+import { 
+  EnhancedCyberpunkBackground,
+  ExplosionEffect 
+} from '../../../shared/components';
 import { Link } from "react-router-dom";
 import { useSignIn, useUser, useClerk } from "@clerk/clerk-react";
 import PropTypes from 'prop-types';

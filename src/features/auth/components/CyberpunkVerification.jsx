@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { RefreshCcw, ArrowLeftIcon, Mail, Clock } from "lucide-react";
-import EnhancedCyberpunkBackground from "./EnhancedCyberpunkBackground";
-import ExplosionEffect from "./ExplosionEffect";
-import CyberpunkError from "./ui/CyberpunkError";  // Make sure this path is correct
+import { 
+  EnhancedCyberpunkBackground,
+  ExplosionEffect,
+  CyberpunkError,
+  LoadingScreen 
+} from '../../../shared/components';
 
 
   const CyberpunkVerification = () => {

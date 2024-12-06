@@ -1,25 +1,30 @@
-import React, { useState } from "react";
-import { useAuth, useUser, useClerk } from "@clerk/clerk-react";
-import { CircuitPatternCard } from './patterns';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser, useClerk } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import {
-  LogOut, User, Settings, Menu, LayoutDashboard,
-  BookOpen, Code2, Trophy, Activity
+  LayoutDashboard,
+  BookOpen,
+  Code2,
+  Trophy,
+  Activity,
+  LogOut,
+  Settings,
+  Menu,
+  User
 } from "lucide-react";
-import EnhancedCyberpunkBackground from "../EnhancedCyberpunkBackground";
-import ExplosionEffect from "../ExplosionEffect";
+import { 
+  EnhancedCyberpunkBackground,
+  ExplosionEffect 
+} from '../../shared/components';
 
 const Dashboard = () => {
-  const { signOut } = useClerk();
   const { user } = useUser();
+  const { signOut } = useClerk();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showExplosion, setShowExplosion] = useState(false);
   const [activeSection, setActiveSection] = useState("Overview");
-
-
-
 
   const navItems = [
     { icon: LayoutDashboard, title: "Overview", active: activeSection === "Overview" },
@@ -29,7 +34,7 @@ const Dashboard = () => {
     { icon: Activity, title: "Recent Activity", active: activeSection === "Recent Activity" }
   ];
 
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
     setShowExplosion(true);
     setTimeout(() => {
       localStorage.removeItem("rememberedCredentials");
@@ -37,37 +42,29 @@ const Dashboard = () => {
         .then(() => navigate("/"))
         .catch((error) => console.error("Error signing out:", error));
     }, 1000);
-  };
+  }, [signOut, navigate]);
 
-  const handleNavigation = (section) => {
+  const handleNavigation = useCallback((section) => {
     setShowExplosion(true);
     setTimeout(() => {
       setActiveSection(section);
       setShowExplosion(false);
     }, 1000);
-  };
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-[#0A0F1B] overflow-hidden">
       {/* Background - lowest layer */}
       <div className="absolute inset-0 z-0">
-        <EnhancedCyberpunkBackground
-          colors={{
-            neonBlue: "#00F6FF",
-            neonPink: "#FF2E97",
-            darkPurple: "#1A0B2E",
-          }}
-        />
+        <EnhancedCyberpunkBackground />
       </div>
 
       {/* Explosion Effect - highest layer */}
-      <AnimatePresence>
-        {showExplosion && (
-          <div className="fixed inset-0 z-50">
-            <ExplosionEffect />
-          </div>
-        )}
-      </AnimatePresence>
+      {showExplosion && (
+        <div className="fixed inset-0 z-50">
+          <ExplosionEffect />
+        </div>
+      )}
 
       {/* Main Content Container - mid layer */}
       <div className="relative z-10">
@@ -144,8 +141,6 @@ const Dashboard = () => {
           </div>
         </nav>
 
-        
-
         {/* Sidebar */}
         <motion.div
           className="fixed top-0 left-0 z-20 h-full pt-20 border-r bg-black/40 backdrop-blur-xl border-white/10"
@@ -196,7 +191,7 @@ const Dashboard = () => {
           )}
         </motion.div>
 
-        {/* Main Content Area */}        
+        {/* Main Content Area */}
         <motion.main
           className="relative z-10 pt-24 transition-all duration-300"
           animate={{
@@ -204,29 +199,7 @@ const Dashboard = () => {
           }}
         >
           <div className="px-6 mx-auto max-w-7xl">
-
-          <AnimatePresence mode="wait">
-              <CircuitPatternCard 
-                title={activeSection}
-                isAnimating={showExplosion}
-              />
-            </AnimatePresence>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative p-6 overflow-hidden border rounded-xl bg-black/40 backdrop-blur-xl border-white/10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#FF2E97]/10 to-[#00F6FF]/10" />
-              <div className="relative z-[1]">
-                <h2 className="mb-4 text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] font-orbitron">
-                  Welcome back, {user?.username || "User"}!
-                </h2>
-                <p className="text-white/80 font-exo">
-                  Your cyberpunk journey continues. More features coming soon...
-                </p>
-              </div>
-            </motion.div>
+            {/* Content will be added here based on selected section */}
           </div>
         </motion.main>
       </div>

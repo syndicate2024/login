@@ -1,7 +1,8 @@
-// src/components/auth/ProtectedRoute.jsx
+// src/features/auth/components/ProtectedRoute.jsx
 import { useAuth } from '@clerk/clerk-react';
 import { Navigate, useLocation } from 'react-router-dom';
-import LoadingScreen from '../ui/LoadingScreen';
+import PropTypes from 'prop-types';
+import { LoadingScreen } from '../../../shared/components';
 
 const ProtectedRoute = ({ children }) => {
   const { isLoaded, isSignedIn } = useAuth();
@@ -18,6 +19,10 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default ProtectedRoute;

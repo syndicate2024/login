@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, GithubIcon, ArrowLeftIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useSignUp } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import EnhancedCyberpunkBackground from './EnhancedCyberpunkBackground';
-import ExplosionEffect from './ExplosionEffect';
-import CyberpunkError from './ui/CyberpunkError';
-import LoadingScreen from './ui/LoadingScreen';
+import { UserPlus, GithubIcon, ArrowLeftIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { 
+  EnhancedCyberpunkBackground,
+  ExplosionEffect,
+  CyberpunkError,
+  LoadingScreen 
+} from '../../../shared/components';
 
 const CyberpunkRegistration = () => {
   const navigate = useNavigate();
@@ -84,9 +86,7 @@ const CyberpunkRegistration = () => {
     <div className="fixed inset-0 bg-gradient-to-br from-[#0A0F1B] to-[#1A0B2E]">
       <EnhancedCyberpunkBackground />
       
-      <AnimatePresence>
-        {showExplosion && <ExplosionEffect />}
-      </AnimatePresence>
+      {showExplosion && <ExplosionEffect />}
 
       {isSubmitting && <LoadingScreen />}
       {error && <CyberpunkError message={error} onClose={() => setError(null)} />}
