@@ -4,10 +4,12 @@ import { useAuth } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 import { ClerkProvider } from "@clerk/clerk-react";
 import { config } from './config';
-import CyberpunkLoginEnhanced from '../features/auth/components/CyberpunkLoginEnhanced';
-import CyberpunkRegistration from '../features/auth/components/CyberpunkRegistration';
-import CyberpunkVerification from '../features/auth/components/CyberpunkVerification';
-import ProtectedRoute from '../features/auth/components/ProtectedRoute';
+import { 
+  CyberpunkLoginEnhanced,
+  CyberpunkRegistration,
+  CyberpunkVerification,
+  ProtectedRoute 
+} from '../features/auth/components';
 import Dashboard from '../features/dashboard/components/Dashboard';
 
 // Loading screen component stays the same
