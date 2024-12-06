@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useUser, useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,7 +16,7 @@ import {
 import { 
   EnhancedCyberpunkBackground,
   ExplosionEffect 
-} from '../../shared/components';
+} from '../../../shared/components';
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -25,14 +25,6 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showExplosion, setShowExplosion] = useState(false);
   const [activeSection, setActiveSection] = useState("Overview");
-
-  const navItems = [
-    { icon: LayoutDashboard, title: "Overview", active: activeSection === "Overview" },
-    { icon: BookOpen, title: "Learning Progress", active: activeSection === "Learning Progress" },
-    { icon: Code2, title: "Projects", active: activeSection === "Projects" },
-    { icon: Trophy, title: "Achievements", active: activeSection === "Achievements" },
-    { icon: Activity, title: "Recent Activity", active: activeSection === "Recent Activity" }
-  ];
 
   const handleSignOut = useCallback(() => {
     setShowExplosion(true);
@@ -152,41 +144,48 @@ const Dashboard = () => {
         >
           {isSidebarOpen && (
             <div className="relative z-[1] p-4">
-              {navItems.map((item, index) => (
-                <motion.button
-                  key={index}
-                  onClick={() => handleNavigation(item.title)}
-                  className={`flex items-center w-full gap-3 px-4 py-3 mb-2 transition-all rounded-lg group relative overflow-hidden
-                             ${item.active ? "bg-white/10" : "hover:bg-white/5"}`}
-                  whileHover={{ x: 5 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] opacity-0 
-                             transition-opacity duration-300 ${
-                               item.active ? "opacity-10" : "group-hover:opacity-5"
-                             }`}
-                  />
-                  <item.icon
-                    className={`w-5 h-5 transition-colors
-                               ${
-                                 item.active
-                                   ? "text-[#00F6FF]"
-                                   : "text-white/70 group-hover:text-[#00F6FF]"
-                               }`}
-                  />
-                  <span
-                    className={`font-medium tracking-wide font-exo transition-colors
-                               ${
-                                 item.active
-                                   ? "bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] bg-clip-text text-transparent"
-                                   : "text-white/70 group-hover:text-white"
-                               }`}
+              {/* Navigation Items */}
+              <div className="space-y-2">
+                {[
+                  { icon: LayoutDashboard, title: "Overview" },
+                  { icon: BookOpen, title: "Learning Progress" },
+                  { icon: Code2, title: "Projects" },
+                  { icon: Trophy, title: "Achievements" },
+                  { icon: Activity, title: "Recent Activity" }
+                ].map((item) => (
+                  <motion.button
+                    key={item.title}
+                    onClick={() => handleNavigation(item.title)}
+                    className={`flex items-center w-full gap-3 px-4 py-3 transition-all rounded-lg group relative overflow-hidden
+                              ${item.title === activeSection ? "bg-white/10" : "hover:bg-white/5"}`}
+                    whileHover={{ x: 5 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {item.title}
-                  </span>
-                </motion.button>
-              ))}
+                    <div className={`absolute inset-0 bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] opacity-0 
+                                transition-opacity duration-300 ${
+                                  item.title === activeSection ? "opacity-10" : "group-hover:opacity-5"
+                                }`} />
+                    <item.icon
+                      className={`w-5 h-5 transition-colors
+                                ${
+                                  item.title === activeSection
+                                    ? "text-[#00F6FF]"
+                                    : "text-white/70 group-hover:text-[#00F6FF]"
+                                }`}
+                    />
+                    <span
+                      className={`font-medium tracking-wide font-exo transition-colors
+                                ${
+                                  item.title === activeSection
+                                    ? "bg-gradient-to-r from-[#FF2E97] to-[#00F6FF] bg-clip-text text-transparent"
+                                    : "text-white/70 group-hover:text-white"
+                                }`}
+                    >
+                      {item.title}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
             </div>
           )}
         </motion.div>
@@ -199,7 +198,7 @@ const Dashboard = () => {
           }}
         >
           <div className="px-6 mx-auto max-w-7xl">
-            {/* Content will be added here based on selected section */}
+            {/* Content for each section will be added here */}
           </div>
         </motion.main>
       </div>

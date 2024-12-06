@@ -10,7 +10,7 @@ import {
   CyberpunkVerification,
   ProtectedRoute 
 } from './features/auth/components';
-import Dashboard from './components/dashboard/Dashboard';
+import Dashboard from './features/dashboard/components/Dashboard';
 
 // Loading screen component stays the same
 const LoadingScreen = () => (
