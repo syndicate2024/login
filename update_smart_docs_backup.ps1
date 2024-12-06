@@ -270,7 +270,7 @@ function New-SessionSummary {
     
     # Get implementation status
     "`n## Implementation Status`n" | Add-Content $sessionFile
-    Get-ChildItem -Path "src\\features\\*\\components" -Directory | ForEach-Object {
+    Get-ChildItem -Path "src\components" -Directory | ForEach-Object {
         "### $($_.Name)" | Add-Content $sessionFile
         $files = Get-ChildItem -Path $_.FullName -File -Recurse
         $files | ForEach-Object {
@@ -315,7 +315,7 @@ function Update-HandoffDocs {
     
     # Add Feature Status with enhanced details
     "`n## Feature Status`n" | Add-Content $handoffFile
-    Get-ChildItem -Path "src\\features\\*\\components" -Directory | ForEach-Object {
+    Get-ChildItem -Path "src\components" -Directory | ForEach-Object {
         $featureName = $_.Name
         $files = Get-ChildItem -Path $_.FullName -File -Recurse
         if ($files.Count -gt 0) {
@@ -417,7 +417,7 @@ function Update-HandoffDocs {
     
     # Add Enhanced Next Steps with context
     "`n## Next Steps`n" | Add-Content $handoffFile
-    Get-ChildItem -Path "src\\features\\*\\components" -Directory | ForEach-Object {
+    Get-ChildItem -Path "src\components" -Directory | ForEach-Object {
         $files = Get-ChildItem -Path $_.FullName -File -Recurse
         if ($files.Count -eq 0) {
             $complexity = "🟢 Low"  # Default to low
